@@ -108,3 +108,4 @@ credentials.json
 token.pickle
 settings.py
 *.pyc
+*.swp
