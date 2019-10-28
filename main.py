@@ -45,9 +45,9 @@ def main():
     # stored credentials.
 
     event = {
-      'summary': 'Prova_api',
+      'summary': 'Test_api',
       'location': '',
-      'description': 'Test delle api google',
+      'description': 'Test',
       'start': {
         'dateTime': '2019-10-29T10:00:00',
         'timeZone':  'Europe/Paris' ,
@@ -60,8 +60,9 @@ def main():
         'RRULE:FREQ=DAILY;COUNT=2'
       ],
       'attendees': [
-        {'email': 'alessio.ascione@iismerlonimiliani.it'},
-        {'email': 'valerio.conti@iismerlonimiliani.it'},
+        #insert here the emails
+        {'email': ''},
+        {'email': ''},
       ],
       'reminders': {
         'useDefault': False,
