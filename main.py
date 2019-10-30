@@ -8,13 +8,13 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
-#from telegram.ext import *
-#from settings import TOKEN
+from telegram.ext import Updater, CommandHandler
+from settings import TOKEN
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
-def main():
+def main(Title):
     """Shows basic usage of the Google Calendar API.
     Prints the start and name of the next 10 events on the user's calendar.
     """
@@ -45,7 +45,7 @@ def main():
     # stored credentials.
 
     event = {
-      'summary': 'Test_api',
+      'summary': Title,
       'location': '',
       'description': 'Test',
       'start': {
@@ -76,5 +76,23 @@ def main():
     event = service.events().insert(calendarId='primary', body=event).execute()
     #print 'Event created: %s' % (event.get('htmlLink'))
 
-if __name__ == '__main__':
-    main()
+def create(update, context): 
+
+    update.message.reply_text('Title')
+    Title = update.message.text[len('/create'):]
+    print(Title)
+
+    #main(Title)
+
+def hello(update, context):
+    update.message.reply_text(
+        'Hello {}'.format(update.message.from_user.first_name))
+
+updater = Updater(TOKEN, use_context=True)
+
+updater.dispatcher.add_handler(CommandHandler('create', create))
+updater.dispatcher.add_handler(CommandHandler('hello', hello))
+
+updater.start_polling()
+updater.idle()
+
