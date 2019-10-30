@@ -56,13 +56,13 @@ def main():
         'dateTime': '2019-10-30T17:00:00',
         'timeZone': 'Europe/Paris' ,
       },
-      'recurrence': [
-        'RRULE:FREQ=DAILY;COUNT=2'
-      ],
+      # BUG: This insert events DAILY and 2 times
+      # 'recurrence': [
+        # 'RRULE:FREQ=DAILY;COUNT=2'
+      # ],
       'attendees': [
-        #insert here the emails
-        {'email': ''},
-        {'email': ''},
+        # Insert here the emails
+        # {'email': ''},
       ],
       'reminders': {
         'useDefault': False,
@@ -75,8 +75,6 @@ def main():
 
     event = service.events().insert(calendarId='primary', body=event).execute()
     #print 'Event created: %s' % (event.get('htmlLink'))
-
-
 
 if __name__ == '__main__':
     main()
