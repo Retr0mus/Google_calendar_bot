@@ -7,7 +7,7 @@ This is a telegram bot who can create events in google calendar
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install requirements.txt.
 
 ```bash
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 Then go to https://developers.google.com/calendar/quickstart/python?pli=1 and follow steps 1 and 2.
 The file credentials.json must be in the directory of the bot.
