@@ -107,5 +107,6 @@ venv.bak/
 credentials.json
 token.pickle
 settings.py
+test.py
 *.pyc
 *.swp
