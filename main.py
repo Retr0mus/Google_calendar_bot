@@ -14,7 +14,7 @@ from settings import TOKEN
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
-def main(Title):
+def event(Title):
     """Shows basic usage of the Google Calendar API.
     Prints the start and name of the next 10 events on the user's calendar.
     """
@@ -75,14 +75,17 @@ def main(Title):
 
     event = service.events().insert(calendarId='primary', body=event).execute()
     #print 'Event created: %s' % (event.get('htmlLink'))
+    print('Event created')
 
 def create(update, context): 
 
-    update.message.reply_text('Title')
+    print('Hello')
+    update.message.reply_text('Hello! What is the name of the event')
     Title = update.message.text[len('/create'):]
     print(Title)
 
-    #main(Title)
+    event(Title)
+    
 
 def hello(update, context):
     update.message.reply_text(
