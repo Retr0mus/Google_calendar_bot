@@ -1,30 +1,177 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 import datetime
+import os
 import pickle
-import os.path
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
+from datetime import datetime
 
-from telegram.ext import Updater, CommandHandler
+from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from telegram.ext import (CommandHandler, ConversationHandler, Filters,
+                          MessageHandler, Updater)
+
 from settings import TOKEN
 
-# If modifying these scopes, delete the file token.pickle.
-SCOPES = ['https://www.googleapis.com/auth/calendar']
+# Possible states in the conversation
+TITLE, START_DATE, START_TIME, END_DATE,\
+    END_TIME, DESCRIPTION, LOCATION = range(7)
 
-def event(Title):
-    """Shows basic usage of the Google Calendar API.
-    Prints the start and name of the next 10 events on the user's calendar.
-    """
+
+
+def start(update, context):
+    # TODO Let me say something
+    pass
+
+def create_event(update, context):
+    update.message.reply_text("Come si chiama l'evento?")
+    return TITLE
+
+
+def check_title(update, context):
+    # Get sent message and save it for later
+    text = update.message.text
+    context.user_data['title'] = text
+
+    update.message.reply_text("Quando inizia? (DD-MM-YYYY)")
+    return START_DATE
+
+
+def check_start_date(update, context):
+    # Get sent message
+    text = update.message.text
+
+    # TODO Check if string is a valid date
+
+    # Convert the date to YYYY-MM-DD
+    date = datetime.strptime(text, "%d-%m-%Y").strftime("%Y-%m-%d")
+
+    # Save it for later
+    context.user_data['start_date'] = date
+    update.message.reply_text("A che ora? (HH:MM)")
+
+    return START_TIME
+
+
+def check_start_time(update, context):
+    # Get sent message
+    text = update.message.text
+
+    # TODO Check if string is a valid time
+
+    # Save it for later
+    context.user_data['start_time'] = text
+    update.message.reply_text("Quando finisce? (DD-MM-YYYY)")
+
+    return END_DATE
+
+
+def check_end_date(update, context):
+    text = update.message.text
+
+    # Convert the date to YYYY-MM-DD
+    date = datetime.strptime(text, "%d-%m-%Y").strftime("%Y-%m-%d")
+
+    # TODO Check if string is a valid date
+
+    # Save it for later
+    context.user_data['end_date'] = date
+    update.message.reply_text("A che ora? (HH:MM)")
+
+    return END_TIME
+
+
+def check_end_time(update, context):
+    # Get sent message
+    text = update.message.text
+
+    # TODO Check if string is a valid time
+
+    # Save it for later
+    context.user_data['end_time'] = text
+    update.message.reply_text("Cosa metto come descrizione dell'evento?")
+
+    return DESCRIPTION
+
+
+def check_description(update, context):
+    # Get sent message and save it for later
+    text = update.message.text
+    context.user_data['description'] = text
+
+    update.message.reply_text("Dove si terrà l'evento? (Via X, Citta' Y)")
+
+    return LOCATION
+
+
+def check_location(update, context):
+    # Get location
+    location = update.message.text
+
+    # Get date from user_data
+    title = context.user_data['title']
+    start_date = context.user_data['start_date']
+    start_time = context.user_data['start_time']
+    end_date = context.user_data['end_date']
+    end_time = context.user_data['end_time']
+    description = context.user_data['description']
+
+    # Insert event with gathered data
+    insert_event(title, start_date, end_date, start_time,
+                 end_time, description, location)
+
+    context.user_data = {}
+    update.message.reply_text("Evento creato con successo!")
+
+    return ConversationHandler.END
+
+
+def cancel(update, context):
+    # Reset user data
+    context.user_data = {}
+    update.message.reply_text("Ho cancellato tutto!")
+
+    return ConversationHandler.END
+
+
+def insert_event(title, start_date, end_date, start_time, end_time, description, location):
+    """Insert a new event in the calendar"""
+
+    # Get API connection
+    service = get_calendar_service()
+
+    # Prepare event
+    event = {
+        'summary': title,
+        'location': location,
+        'description': description,
+        'start': {
+            'dateTime': '{0}T{1}:00'.format(start_date, start_time),
+            'timeZone':  'Europe/Rome',
+        },
+        'end': {
+            'dateTime': '{0}T{1}:00'.format(end_date, end_time),
+            'timeZone': 'Europe/Rome',
+        },
+    }
+
+    # Insert event
+    event = service.events().insert(calendarId='primary', body=event).execute()
+
+def get_calendar_service():
+    """Create a connection to the Calendar API"""
     creds = None
+
+    # Delete the file token.pickle if modifying these scopes
+    SCOPES = ['https://www.googleapis.com/auth/calendar']
+
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
     if os.path.exists('token.pickle'):
         with open('token.pickle', 'rb') as token:
             creds = pickle.load(token)
+
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
@@ -37,65 +184,60 @@ def event(Title):
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
 
-    service = build('calendar', 'v3', credentials=creds)
+    return build('calendar', 'v3', credentials=creds)
 
-    # Refer to the Python quickstart on how to setup the environment:
-    # https://developers.google.com/calendar/quickstart/python
-    # Change the scope to 'https://www.googleapis.com/auth/calendar' and delete any
-    # stored credentials.
 
-    event = {
-      'summary': Title,
-      'location': '',
-      'description': 'Test',
-      'start': {
-        'dateTime': '2019-10-29T10:00:00',
-        'timeZone':  'Europe/Paris' ,
-      },
-      'end': {
-        'dateTime': '2019-10-30T17:00:00',
-        'timeZone': 'Europe/Paris' ,
-      },
-      # BUG: This insert events DAILY and 2 times
-      # 'recurrence': [
-        # 'RRULE:FREQ=DAILY;COUNT=2'
-      # ],
-      'attendees': [
-        # Insert here the emails
-        # {'email': ''},
-      ],
-      'reminders': {
-        'useDefault': False,
-        'overrides': [
-          {'method': 'email', 'minutes': 24 * 60},
-          {'method': 'popup', 'minutes': 10},
-        ],
-      },
-    }
+def main():
+    print("---Starting bot---")
 
-    event = service.events().insert(calendarId='primary', body=event).execute()
-    #print 'Event created: %s' % (event.get('htmlLink'))
-    print('Event created')
+    # Initialize the bot
+    updater = Updater(TOKEN, use_context=True)
+    dispatcher = updater.dispatcher
 
-def create(update, context): 
+    # Add command handlers
+    dispatcher.add_handler(CommandHandler('start', start))
 
-    print('Hello')
-    update.message.reply_text('Hello! What is the name of the event')
-    Title = update.message.text[len('/create'):]
-    print(Title)
+    # Create new conversation handler
+    dispatcher.add_handler(ConversationHandler(
+        # Conversation start from this handler
+        entry_points=[CommandHandler('create_event', create_event)],
 
-    event(Title)
-    
+        # Defines the different states of conversation a user can be in
+        states={
+            # Filter messages looking just for text
+            TITLE: [MessageHandler(Filters.text, check_title)],
 
-def hello(update, context):
-    update.message.reply_text(
-        'Hello {}'.format(update.message.from_user.first_name))
+            # Filter messages looking for date (31/12/19)
+            START_DATE: [MessageHandler(Filters.regex('[0-9]{2}-[0-9]{2}-[0-9]{2}'), check_start_date)],
 
-updater = Updater(TOKEN, use_context=True)
+            # Filter messages looking for time (09:00)
+            START_TIME: [MessageHandler(Filters.regex('[0-9]{2}:[0-9]{2}'), check_start_time)],
 
-updater.dispatcher.add_handler(CommandHandler('create', create))
-updater.dispatcher.add_handler(CommandHandler('hello', hello))
+            # Filter messages looking for date (31/12/19)
+            END_DATE: [MessageHandler(Filters.regex('[0-9]{2}-[0-9]{2}-[0-9]{2}'), check_end_date)],
 
-updater.start_polling()
-updater.idle()
+            # Filter messages looking for time (09:00)
+            END_TIME: [MessageHandler(Filters.regex('[0-9]{2}:[0-9]{2}'), check_end_time)],
 
+            # Filter messages looking just for text
+            DESCRIPTION: [MessageHandler(Filters.text, check_description)],
+
+            # Filter messages for text
+            LOCATION: [MessageHandler(Filters.text, check_location)],
+        },
+
+        # A list of handlers that might be used if the user is in a conversation,
+        # but every handler for their current state returned
+        fallbacks=[CommandHandler('cancel', cancel)],
+
+        # Determines if a user can restart a conversation with an entry point
+        allow_reentry=True
+    ))
+
+    # Start bot
+    updater.start_polling()
+    updater.idle()
+
+
+if __name__ == "__main__":
+    main()
