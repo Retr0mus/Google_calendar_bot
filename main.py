@@ -21,6 +21,7 @@ TITLE, START_DATE, START_TIME, END_DATE,\
 
 def start(update, context):
     # TODO Let me say something
+    update.message.reply_text("Salve, questo bot crea eventi per un calendario google. Premi /create_event per iniziare")
     pass
 
 def create_event(update, context):
@@ -157,6 +158,7 @@ def insert_event(title, start_date, end_date, start_time, end_time, description,
 
     # Insert event
     event = service.events().insert(calendarId='primary', body=event).execute()
+    #update.message.reply_text('Evento creato con successo!')
 
 def get_calendar_service():
     """Create a connection to the Calendar API"""
