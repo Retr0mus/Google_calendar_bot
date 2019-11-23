@@ -14,4 +14,6 @@ The file credentials.json must be in the directory of the bot.
 
 ## Usage
 
+Copy settings.py.dist in settings.py (i.e. with: `cp settings.py.dist settings.py`)
+
 In settings.py insert your bot token, then start the bot (python main.py) and follow the bot instructions.
