@@ -157,7 +157,8 @@ def insert_event(title, start_date, end_date, start_time, end_time, description,
     }
 
     # Insert event
-    event = service.events().insert(calendarId='primary', body=event).execute()
+    calendar_id = settings.DEFAULTS.get('calendar_id', 'primary')
+    event = service.events().insert(calendarId=calendar_id, body=event).execute()
     #update.message.reply_text('Evento creato con successo!')
 
 def get_calendar_service():

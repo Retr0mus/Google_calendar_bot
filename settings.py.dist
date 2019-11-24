@@ -1,1 +1,5 @@
 TOKEN = 'Insert your token here'
+DEFAULTS = {
+    "calendar_id": "primary",
+    "location": "via tal dei tali, 43 - 60044 Fabriano (AN)",
+}
