@@ -211,16 +211,16 @@ def main():
             TITLE: [MessageHandler(Filters.text, check_title)],
 
             # Filter messages looking for date (31/12/19)
-            START_DATE: [MessageHandler(Filters.regex('[0-9]{2}-[0-9]{2}-[0-9]{2}'), check_start_date)],
+            START_DATE: [MessageHandler(Filters.regex('[0-3][0-9]-[0-1][0-9]-[0-9]{4}'), check_start_date)],
 
             # Filter messages looking for time (09:00)
-            START_TIME: [MessageHandler(Filters.regex('[0-9]{2}:[0-9]{2}'), check_start_time)],
+            START_TIME: [MessageHandler(Filters.regex('[0-2][0-9]:[0-5][0-9]'), check_start_time)],
 
             # Filter messages looking for date (31/12/19)
-            END_DATE: [MessageHandler(Filters.regex('[0-9]{2}-[0-9]{2}-[0-9]{2}'), check_end_date)],
+            END_DATE: [MessageHandler(Filters.regex('[0-3][0-9]-[0-1][0-9]-[0-9]{4}'), check_end_date)],
 
             # Filter messages looking for time (09:00)
-            END_TIME: [MessageHandler(Filters.regex('[0-9]{2}:[0-9]{2}'), check_end_time)],
+            END_TIME: [MessageHandler(Filters.regex('[0-2][0-9]:[0-5][0-9]'), check_end_time)],
 
             # Filter messages looking just for text
             DESCRIPTION: [MessageHandler(Filters.text, check_description)],
